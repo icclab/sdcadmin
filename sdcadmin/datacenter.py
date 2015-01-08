@@ -20,6 +20,7 @@ import requests
 
 from .machine import SmartMachine, KVMMachine, Machine
 from .job import Job
+from .package import Package
 
 
 class DataCenter(object):
@@ -180,3 +181,14 @@ class DataCenter(object):
     def __get_job(self, uuid):
         raw_job_data, _ = self.request('GET', 'workflow', '/jobs/' + uuid)
         return raw_job_data
+
+    def list_packages(self):
+        raw_package_data, _ = self.request('GET', 'papi', '/packages')
+        return [Package(datacenter=self, data=package) for package in raw_package_data]
+
+    def get_package(self, uuid):
+        return Package(self, self.__get_package(uuid))
+
+    def __get_package(self, uuid):
+        raw_package_data,  _ = self.request('GET', 'papi', '/packages/' + uuid)
+        return raw_package_data
