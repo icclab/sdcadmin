@@ -97,3 +97,16 @@ class TestDataCenter(unittest.TestCase):
         test_vm = vms.pop()
         verify_vm = self.dc.get_kvm_machine(test_vm.uuid)
         self.assertEqual(test_vm, verify_vm)
+
+    def test_get_machine(self):
+        smart_machines = self.dc.list_smart_machines()
+        kvm_machines = self.dc.list_kvm_machines()
+
+        test_sm = smart_machines.pop()
+        test_kvm = kvm_machines.pop()
+
+        test_sm_ = self.dc.get_machine(test_sm.uuid)
+        self.assertEqual(test_sm, test_sm_)
+
+        test_kvm_ = self.dc.get_machine(test_kvm.uuid)
+        self.assertEqual(test_kvm, test_kvm_)

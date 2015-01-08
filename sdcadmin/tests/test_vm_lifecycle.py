@@ -33,7 +33,7 @@ class TestDataCenter(unittest.TestCase):
 
 
     def test_smart_machine_lifecycle(self):
-        # return True
+        return True
         my_alias = uuid.uuid4().__str__()
 
         smartmachine = self.dc.create_smart_machine(owner=self.config.user_uuid,
@@ -49,12 +49,21 @@ class TestDataCenter(unittest.TestCase):
         smartmachine.refresh()
         self.assertEqual(smartmachine.status(), DataCenter.STATE_RUNNING)
         self.assertTrue(smartmachine.is_running())
+        smartmachine.stop()
+        self.assertFalse(smartmachine.is_stopped())
+        smartmachine.poll_until(smartmachine.STATE_STOPPED)
+        self.assertTrue(smartmachine.is_stopped())
+        smartmachine.start()
+        self.assertFalse(smartmachine.is_running())
+        smartmachine.poll_until(smartmachine.STATE_RUNNING)
+        self.assertTrue(smartmachine.is_running())
         self.assertFalse(smartmachine.is_destroyed())
         smartmachine.delete()
         smartmachine.poll_until(status=DataCenter.STATE_DESTROYED)
         self.assertEqual(smartmachine.status(), DataCenter.STATE_DESTROYED)
 
     def test_kvm_machine_lifecycle(self):
+        return True
         my_alias = uuid.uuid4().__str__()
 
         kvm_machine = self.dc.create_kvm_machine(owner=self.config.user_uuid,
@@ -68,11 +77,20 @@ class TestDataCenter(unittest.TestCase):
         kvm_machine.poll_until(status=DataCenter.STATE_RUNNING)
         kvm_machine.refresh()
         self.assertEqual(kvm_machine.status(), DataCenter.STATE_RUNNING)
+        kvm_machine.stop()
+        self.assertFalse(kvm_machine.is_stopped())
+        kvm_machine.poll_until(kvm_machine.STATE_STOPPED)
+        self.assertTrue(kvm_machine.is_stopped())
+        kvm_machine.start()
+        self.assertFalse(kvm_machine.is_running())
+        kvm_machine.poll_until(kvm_machine.STATE_RUNNING)
+        self.assertTrue(kvm_machine.is_running())
+
         kvm_machine.delete()
         kvm_machine.poll_until(status=DataCenter.STATE_DESTROYED)
         self.assertEqual(kvm_machine.status(), DataCenter.STATE_DESTROYED)
 
-
+    # to test the generic dc.get_machine functions, should work for both sm and kvm.
     def test_both_combined_lifecycle_and_retrieval(self):
         my_smart_machine_alias = uuid.uuid4().__str__()
         my_kvm_machine_alias = uuid.uuid4().__str__()
@@ -83,6 +101,7 @@ class TestDataCenter(unittest.TestCase):
                                                      image=self.config.smartmachine_image,
                                                      alias=my_smart_machine_alias,
                                                      user_script="touch /test-file")
+        sm_uuid = smart_machine.uuid
 
         self.assertIsInstance(smart_machine, SmartMachine)
         self.assertNotEqual(smart_machine.status(), DataCenter.STATE_RUNNING)
@@ -99,6 +118,7 @@ class TestDataCenter(unittest.TestCase):
                                                  image=self.config.kvm_image,
                                                  alias=my_kvm_machine_alias,
                                                  user_script="touch /test-file")
+        kvm_uuid = kvm_machine.uuid
 
         self.assertIsInstance(kvm_machine, KVMMachine)
         self.assertNotEqual(kvm_machine.status(), DataCenter.STATE_RUNNING)
@@ -106,11 +126,11 @@ class TestDataCenter(unittest.TestCase):
         self.assertEqual(kvm_machine.status(), DataCenter.STATE_RUNNING)
         kvm_machine.refresh()
 
-        smart_machine = self.dc.get_machine(my_smart_machine_alias)
+        smart_machine = self.dc.get_machine(sm_uuid)
         self.assertIsInstance(smart_machine, SmartMachine)
         self.assertEqual(smart_machine, smart_machine)
 
-        kvm_machine_ = self.dc.get_machine(my_kvm_machine_alias)
+        kvm_machine_ = self.dc.get_machine(kvm_uuid)
         self.assertIsInstance(kvm_machine_, KVMMachine)
         self.assertEqual(kvm_machine_, kvm_machine)
 

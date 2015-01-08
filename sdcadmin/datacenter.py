@@ -164,9 +164,9 @@ class DataCenter(object):
 
     def get_machine(self, uuid):
         raw_vm_data = self.__get_machine(uuid)
-        if raw_vm_data['brand'] == 'joyent':
+        if raw_vm_data.get('brand') == 'joyent':
             return SmartMachine(self, raw_vm_data)
-        if raw_vm_data['brand'] == 'kvm':
+        if raw_vm_data.get('brand') == 'kvm':
             return KVMMachine(self, raw_vm_data)
         return None
 
