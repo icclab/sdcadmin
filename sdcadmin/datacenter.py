@@ -128,13 +128,14 @@ class DataCenter(object):
         return vm
 
     def create_kvm_machine(self, owner, networks, package, image, alias=None, user_script=""):
-        # TODO: disk size should resolve from package
+        package_obj = Package(datacenter=self, uuid=package)
+
         params = {'brand': 'kvm',
                   'owner_uuid': owner,
                   'networks': networks,
                   'billing_id': package,
                   'disks': [{'image_uuid': image},
-                            {'size': 40960}]}
+                            {'size': package_obj.quota}]}
         if alias:
             params.update({'alias': alias})
         metadata = {}
@@ -154,17 +155,17 @@ class DataCenter(object):
         return raw_job_data
 
     def get_smart_machine(self, uuid):
-        return SmartMachine(self, self.__get_machine(uuid))
+        return SmartMachine(self, self.get_machine_raw(uuid))
 
     def get_kvm_machine(self, uuid):
-        return KVMMachine(self, self.__get_machine(uuid))
+        return KVMMachine(self, self.get_machine_raw(uuid))
 
-    def __get_machine(self, uuid):
+    def get_machine_raw(self, uuid):
         raw_vm_data, _ = self.request('GET', 'vmapi', '/vms/' + uuid)
         return raw_vm_data
 
     def get_machine(self, uuid):
-        raw_vm_data = self.__get_machine(uuid)
+        raw_vm_data = self.get_machine_raw(uuid)
         if raw_vm_data.get('brand') == 'joyent':
             return SmartMachine(self, raw_vm_data)
         if raw_vm_data.get('brand') == 'kvm':
@@ -176,9 +177,9 @@ class DataCenter(object):
         return [Job(datacenter=self, data=job) for job in raw_job_data]
 
     def get_job(self, uuid):
-        return Job(self, self.__get_job(uuid))
+        return Job(self, self.get_job_raw(uuid))
 
-    def __get_job(self, uuid):
+    def get_job_raw(self, uuid):
         raw_job_data, _ = self.request('GET', 'workflow', '/jobs/' + uuid)
         return raw_job_data
 
@@ -187,8 +188,8 @@ class DataCenter(object):
         return [Package(datacenter=self, data=package) for package in raw_package_data]
 
     def get_package(self, uuid):
-        return Package(self, self.__get_package(uuid))
+        return Package(self, self.get_package_raw(uuid))
 
-    def __get_package(self, uuid):
+    def get_package_raw(self, uuid):
         raw_package_data,  _ = self.request('GET', 'papi', '/packages/' + uuid)
         return raw_package_data

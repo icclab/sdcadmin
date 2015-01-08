@@ -27,7 +27,7 @@ class Job(object):
         if not data:
             if not uuid:
                 raise ValueError('Must provide either data or uuid')
-            data, _ = self.dc.request('GET', 'workflow', '/jobs/' + uuid)
+            data = self.dc.get_job_raw(uuid=uuid)
         self._save(data)
 
     def _save(self, data):

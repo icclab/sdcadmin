@@ -33,7 +33,6 @@ class TestDataCenter(unittest.TestCase):
 
 
     def test_smart_machine_lifecycle(self):
-        return True
         my_alias = uuid.uuid4().__str__()
 
         smartmachine = self.dc.create_smart_machine(owner=self.config.user_uuid,
@@ -63,7 +62,6 @@ class TestDataCenter(unittest.TestCase):
         self.assertEqual(smartmachine.status(), DataCenter.STATE_DESTROYED)
 
     def test_kvm_machine_lifecycle(self):
-        return True
         my_alias = uuid.uuid4().__str__()
 
         kvm_machine = self.dc.create_kvm_machine(owner=self.config.user_uuid,

@@ -7,7 +7,7 @@ class Package(object):
         if not data:
             if not uuid:
                 raise Exception('Must pass either data or uuid')
-            data = self.dc.get_package(uuid=uuid)
+            data = self.dc.get_package_raw(uuid=uuid)
         self._save(data)
 
     def _save(self, data):

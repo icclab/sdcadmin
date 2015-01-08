@@ -30,7 +30,7 @@ class Machine(object):
         if not data:
             if not machine_uuid:
                 raise ValueError('Must provide either data or machine_uuid')
-            data = self.dc.request('GET', 'vmapi', '/vms/' + machine_uuid)
+            data = self.dc.get_machine_raw(uuid=uuid)
         self._save(data)
 
     def _save(self, data):
