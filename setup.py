@@ -24,7 +24,6 @@ setup(
     author='ernm',
     author_email='ernm@zhaw.ch',
     description='API wrapper for the SDC APIs on the admin network',
-    long_description=open('README.md', 'rt').read(),
     install_requires=[
         'requests>=2.5.1'
     ]
