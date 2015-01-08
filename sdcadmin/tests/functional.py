@@ -1,4 +1,4 @@
-# Copyright 2014 Zuercher Hochschule fuer Angewandte Wissenschaften
+# Copyright 2015 Zuercher Hochschule fuer Angewandte Wissenschaften
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -20,7 +20,7 @@ from sdcadmin.tests.config.test_config import TestConfig
 
 
 class LifecycleTest(unittest.TestCase):
-    def test_create_retrieve_update_save_delete(self):
+    def test_create_retrieve_save_delete(self):
         # John is a user who wants to use this library to manage kvm and smart machines on a SDC
         # he was given a user account which he should use as the owner of his systems:
         # user John, password: johnpass1, user-uuid: 9d5ae03c-d64a-ea5b-b020-9ae6e3b6bb9e
