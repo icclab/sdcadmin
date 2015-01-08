@@ -40,7 +40,7 @@ class TestMachine(unittest.TestCase):
         smart_machine_test_data = {'uuid': 'test', 'foo': 'bar'}
         smart_machine = SmartMachine(datacenter=MagicMock(), data=smart_machine_test_data)
         smart_machine.dc.request = MagicMock()
-        smart_machine.dc.request.return_value = {'foo': 'not-bar'}
+        smart_machine.dc.request.return_value = ({'foo': 'not-bar'}, None)
         smart_machine.refresh()
         self.assertEqual(getattr(smart_machine, 'foo'), 'not-bar')
         self.assertEqual(smart_machine.dc.request.call_count, 1)
