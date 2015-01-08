@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='sdcadmin',
@@ -24,6 +24,7 @@ setup(
     author='ernm',
     author_email='ernm@zhaw.ch',
     description='API wrapper for the SDC APIs on the admin network',
+    long_description=open('README.md', 'rt').read(),
     install_requires=[
         'requests>=2.5.1'
     ]
