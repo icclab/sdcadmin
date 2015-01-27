@@ -52,9 +52,16 @@ class LifecycleTest(unittest.TestCase):
         self.assertGreater(dc.list_networks().__len__(), 1)
 
         # John creates his own network
-        my_network = dc.create_network(name='john_net', owner_uuids=[user_uuid], subnet='10.10.0.0/24', gateway='10.10.0.100',
-        provision_start_ip='10.10.0.101', provision_end_ip='10.10.0.200', vlan_id='1337', nic_tag='customer',
-        resolvers=['8.8.8.8', '8.8.4.4'], routes={'10.11.0.0/24': '10.10.0.50'}, description='john_net for john')
+        my_network = dc.create_network(name='john_net', owner_uuids=[user_uuid],
+                                       subnet=TestConfig.subnet,
+                                       gateway=TestConfig.gateway,
+                                       provision_start_ip=TestConfig.provision_start_ip,
+                                       provision_end_ip=TestConfig.provision_end_ip,
+                                       vlan_id=TestConfig.vlan_id,
+                                       nic_tag=TestConfig.nic_tag,
+                                       resolvers=TestConfig.resolvers,
+                                       routes=TestConfig.routes,
+                                       description='john_net for john')
         my_network_uuid = my_network.uuid
 
 
