@@ -26,7 +26,7 @@ from sdcadmin.machine import SmartMachine, KVMMachine
 # a wild mix of unit and integration tests
 # lot of mocking missing...
 
-class TestDataCenter(unittest.TestCase):
+class TestLifeCycleVM(unittest.TestCase):
     def setUp(self):
         self.config = TestConfig()
         self.dc = DataCenter(sapi=self.config.sapi_ip)
