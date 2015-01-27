@@ -1,13 +1,24 @@
 __author__ = 'ernm'
 
 class Package(object):
+    owner_uuids = []
+    uuid = ''
+
+
+    api = 'papi'
+    base_url = '/packages/'
+    identifier_field = 'uuid'
+
+
     def __init__(self, datacenter, data=None, uuid=None):
         self.dc = datacenter
 
         if not data:
             if not uuid:
                 raise Exception('Must pass either data or uuid')
-            data = self.dc.get_package_raw(uuid=uuid)
+            data, response = self.dc.request('GET', self.api, self.base_url + uuid)
+            if not data.get(self.identifier_field):
+                return
         self._save(data)
 
     def _save(self, data):

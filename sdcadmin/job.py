@@ -14,20 +14,24 @@
 #    under the License.
 __author__ = 'ernm'
 
-
 class Job(object):
     uuid = ''
     workflow = ''
     workflow_uuid = ''
 
-    def __init__(self, datacenter, data=None, uuid=None):
+    api = 'workflow'
+    base_url = '/jobs/'
+    identifier_field = 'uuid'
 
+    def __init__(self, datacenter, data=None, uuid=None):
         self.dc = datacenter
 
         if not data:
             if not uuid:
-                raise ValueError('Must provide either data or uuid')
-            data = self.dc.get_job_raw(uuid=uuid)
+                raise Exception('Must pass either data or uuid')
+            data, response = self.dc.request('GET', self.api, self.base_url + uuid)
+            if not data.get(self.identifier_field):
+                return
         self._save(data)
 
     def _save(self, data):

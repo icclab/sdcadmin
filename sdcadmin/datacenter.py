@@ -178,28 +178,22 @@ class DataCenter(object):
         return [Job(datacenter=self, data=job) for job in raw_job_data]
 
     def get_job(self, uuid):
-        return Job(self, self.get_job_raw(uuid))
-
-    def get_job_raw(self, uuid):
-        raw_job_data, _ = self.request('GET', 'workflow', '/jobs/' + uuid)
-        return raw_job_data
+        job = Job(self, uuid=uuid)
+        if job.uuid:
+            return job
 
     def list_packages(self):
         raw_package_data, _ = self.request('GET', 'papi', '/packages')
         return [Package(datacenter=self, data=package) for package in raw_package_data]
 
     def get_package(self, uuid):
-        return Package(self, self.get_package_raw(uuid))
-
-    def get_package_raw(self, uuid):
-        raw_package_data,  _ = self.request('GET', 'papi', '/packages/' + uuid)
-        return raw_package_data
+        package = Package(self, uuid=uuid)
+        if package.uuid:
+            return package
 
     def list_networks(self):
         raw_network_data, _ = self.request('GET', 'napi', '/networks')
         return [Network(datacenter=self, data=network) for network in raw_network_data]
-
-    # TODO: should get_* functions use uuid field in consturctor?
 
     def get_network(self, uuid):
         network = Network(self, uuid=uuid)

@@ -18,19 +18,29 @@ import time
 
 
 class Machine(object):
+
+    uuid = ''
+
+    api = 'vmapi'
+    base_url = '/vms/'
+    identifier_field = 'uuid'
+
     STATE_RUNNING = 'running'
     STATE_FAILED = 'failed'
     STATE_DESTROYED = 'destroyed'
     STATE_PROVISIONING = 'provisioning'
     STATE_STOPPED = 'stopped'
 
-    def __init__(self, datacenter, data=None, machine_uuid=None):
+    def __init__(self, datacenter, data=None, uuid=None):
 
         self.dc = datacenter
+
         if not data:
-            if not machine_uuid:
-                raise ValueError('Must provide either data or machine_uuid')
-            data = self.dc.get_machine_raw(uuid=machine_uuid)
+            if not uuid:
+                raise Exception('Must pass either data or uuid')
+            data, response = self.dc.request('GET', self.api, self.base_url + uuid)
+            if not data.get(self.identifier_field):
+                return
         self._save(data)
 
     def _save(self, data):
@@ -38,13 +48,13 @@ class Machine(object):
             setattr(self, k, v)
 
     def status(self):
-        status_data, _ = self.dc.request('GET', 'vmapi', '/statuses', params={'uuids': self.uuid})
+        status_data, _ = self.dc.request('GET', self.api, '/statuses', params={'uuids': self.uuid})
         state = status_data.get(self.uuid)
         self.state = state
         return state
 
     def refresh(self):
-        data, _ = self.dc.request('GET', 'vmapi', '/vms/' + self.uuid)
+        data, _ = self.dc.request('GET', self.api, self.base_url + self.uuid)
         self._save(data)
 
     def is_running(self):
@@ -58,11 +68,11 @@ class Machine(object):
 
 
     def stop(self):
-        raw_job_data, response = self.dc.request('POST', 'vmapi', '/vms/' + self.uuid + '?action=stop')
+        raw_job_data, response = self.dc.request('POST', self.api, self.base_url + self.uuid + '?action=stop')
         response.raise_for_status()
 
     def start(self):
-        raw_job_data, response = self.dc.request('POST', 'vmapi', '/vms/' + self.uuid + '?action=start')
+        raw_job_data, response = self.dc.request('POST', self.api, self.base_url + self.uuid + '?action=start')
         response.raise_for_status()
 
     def poll_until(self, status):
@@ -82,7 +92,7 @@ class Machine(object):
         return
 
     def delete(self):
-        raw_job_data, response = self.dc.request('DELETE', 'vmapi', '/vms/' + self.uuid)
+        raw_job_data, response = self.dc.request('DELETE', self.api, self.base_url + self.uuid)
         response.raise_for_status()
 
 
