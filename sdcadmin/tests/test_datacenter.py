@@ -124,5 +124,3 @@ class TestDataCenter(unittest.TestCase):
         self.assertEqual(networks.__len__(), 2)
         self.assertEqual(networks.pop().uuid, 'bar')
         self.assertEqual(networks.pop().uuid, 'foo')
-
-    def test_network_lifecycle
