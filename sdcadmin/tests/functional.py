@@ -38,7 +38,7 @@ class LifecycleTest(unittest.TestCase):
         kvm_image = TestConfig.kvm_image
 
         # and the external network:
-        network_uuid = TestConfig.network_uuid
+        network_uuid = TestConfig.external_network_uuid
 
 
         # John, curious as he is, imports the library

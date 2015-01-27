@@ -29,11 +29,24 @@ class TestConfig(object):
     papi_ip = '10.0.0.23'
     workflow_ip = '10.0.0.13'
 
+    # vm
     #@adminui: manual retrieval
     user_uuid = 'ca50e0a6-0f87-c911-fb01-e139514f760f'
     package_small = 'a8c2033d-e8eb-c17e-83ce-b10e36f1339b'
     package_big = '395ecfd6-3050-4082-ea25-9b51ad72873d'
     smartmachine_image = '859e9466-7ef4-11e4-b103-27886e7d9a7d'
     kvm_image = 'b1df4936-7a5c-11e4-98ed-dfe1fa3a813a'
-    network_uuid = 'f27c02f1-5b4c-4ef1-b463-59c7e60f02e5'
+    external_network_uuid = 'f27c02f1-5b4c-4ef1-b463-59c7e60f02e5'
+
+    # network
+    network_name='foo_net'
+    nic_tag = 'customer'
+    subnet='10.10.0.0/24'
+    gateway='10.10.0.100'
+    provision_start_ip='10.10.0.101'
+    provision_end_ip='10.10.0.200'
+    vlan_id='1337'
+    resolvers=['8.8.8.8', '8.8.4.4']
+    routes={'10.11.0.0/24': '10.10.0.50'}
+    network_description='foo_net_desc'
 

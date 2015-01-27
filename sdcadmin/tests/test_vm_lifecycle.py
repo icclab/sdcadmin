@@ -36,7 +36,7 @@ class TestLifeCycleVM(unittest.TestCase):
         my_alias = uuid.uuid4().__str__()
 
         smartmachine = self.dc.create_smart_machine(owner=self.config.user_uuid,
-                                                    networks=[self.config.network_uuid],
+                                                    networks=[self.config.external_network_uuid],
                                                     package=self.config.package_small,
                                                     image=self.config.smartmachine_image,
                                                     alias=my_alias)
@@ -65,7 +65,7 @@ class TestLifeCycleVM(unittest.TestCase):
         my_alias = uuid.uuid4().__str__()
 
         kvm_machine = self.dc.create_kvm_machine(owner=self.config.user_uuid,
-                                                 networks=[self.config.network_uuid],
+                                                 networks=[self.config.external_network_uuid],
                                                  package=self.config.package_small,
                                                  image=self.config.kvm_image,
                                                  alias=my_alias)
@@ -94,7 +94,7 @@ class TestLifeCycleVM(unittest.TestCase):
         my_kvm_machine_alias = uuid.uuid4().__str__()
 
         smart_machine = self.dc.create_smart_machine(owner=self.config.user_uuid,
-                                                     networks=[self.config.network_uuid],
+                                                     networks=[self.config.external_network_uuid],
                                                      package=self.config.package_small,
                                                      image=self.config.smartmachine_image,
                                                      alias=my_smart_machine_alias,
@@ -111,7 +111,7 @@ class TestLifeCycleVM(unittest.TestCase):
         self.assertFalse(smart_machine.is_destroyed())
 
         kvm_machine = self.dc.create_kvm_machine(owner=self.config.user_uuid,
-                                                 networks=[self.config.network_uuid],
+                                                 networks=[self.config.external_network_uuid],
                                                  package=self.config.package_small,
                                                  image=self.config.kvm_image,
                                                  alias=my_kvm_machine_alias,
