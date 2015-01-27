@@ -30,11 +30,17 @@ class TestLifeCycleNetwork(unittest.TestCase):
         self.dc = DataCenter(sapi=self.config.sapi_ip)
 
     def test_network_lifecycle(self):
-        my_network = self.dc.create_network(name='foo_net', owner_uuids=[self.config.user_uuid], subnet='10.10.0.0/24',
-                                            gateway='10.10.0.100', provision_start_ip='10.10.0.101',
-                                            provision_end_ip='10.10.0.200', vlan_id='1337', nic_tag='customer',
-                                            resolvers=['8.8.8.8', '8.8.4.4'], routes={'10.11.0.0/24': '10.10.0.50'},
-                                            description='foo_net_desc')
+        my_network = self.dc.create_network(name=self.config.network_name,
+                                            owner_uuids=[self.config.user_uuid],
+                                            subnet=self.config.subnet,
+                                            gateway=self.config.gateway,
+                                            provision_start_ip=self.config.provision_start_ip,
+                                            provision_end_ip=self.config.provision_end_ip,
+                                            vlan_id=self.config.vlan_id,
+                                            nic_tag=self.config.nic_tag,
+                                            resolvers=self.config.resolvers,
+                                            routes=self.config.routes,
+                                            description=self.config.network_description)
 
         self.assertIsInstance(my_network, Network)
         self.assertIsNotNone(my_network.uuid)
@@ -44,7 +50,7 @@ class TestLifeCycleNetwork(unittest.TestCase):
 
         my_network.delete()
         my_network_ = self.dc.get_network(uuid=my_network.uuid)
-        self.assertIsNone(my_network_)
+        self.assertIsNone(my_network_, 'network still exists')
 
 
 

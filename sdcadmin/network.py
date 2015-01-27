@@ -24,7 +24,8 @@ class Network(object):
 
 
     def delete(self):
-        pass
+        _, response = self.dc.request('DELETE', 'napi', '/networks/' + self.uuid)
+        response.raise_for_status()
 
     def refresh(self):
         data, _ = self.dc.request('GET', 'napi', '/networks/' + self.uuid)
