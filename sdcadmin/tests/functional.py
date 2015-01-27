@@ -63,11 +63,14 @@ class LifecycleTest(unittest.TestCase):
                                        routes=TestConfig.routes,
                                        description='john_net for john')
         my_network_uuid = my_network.uuid
-
-
         self.assertIsNotNone(my_network)
-
         self.assertIsNotNone(my_network_uuid)
+
+
+        # John retrieves his network
+        my_network_ = dc.get_network(my_network_uuid)
+        self.assertEqual(my_network, my_network_)
+
 
 
         # John sees no machines created yet for his user that are running
