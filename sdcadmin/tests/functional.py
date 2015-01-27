@@ -48,6 +48,21 @@ class LifecycleTest(unittest.TestCase):
         dc = DataCenter(sapi=sapi_ip)
         self.assertTrue(dc.healthcheck_vmapi())
 
+        # John does not want his machines to be public. He looks around for other networks
+        self.assertGreater(dc.list_networks().__len__(), 1)
+
+        # John creates his own network
+        my_network = dc.create_network(name='john_net', owner_uuids=[user_uuid], subnet='10.10.0.0/24', gateway='10.10.0.100',
+        provision_start_ip='10.10.0.101', provision_end_ip='10.10.0.200', vlan_id='1337', nic_tag='customer',
+        resolvers=['8.8.8.8', '8.8.4.4'], routes={'10.11.0.0/24': '10.10.0.50'}, description='john_net for john')
+        my_network_uuid = my_network.uuid
+
+
+        self.assertIsNotNone(my_network)
+
+        self.assertIsNotNone(my_network_uuid)
+
+
         # John sees no machines created yet for his user that are running
         all_my_vms = dc.list_machines(owner_uuid=user_uuid, state=dc.STATE_RUNNING)
         all_my_smart_machines = dc.list_smart_machines(owner_uuid=user_uuid, state=dc.STATE_RUNNING)
@@ -56,7 +71,7 @@ class LifecycleTest(unittest.TestCase):
 
 
         # John creates a first smartmachine and is pleased
-        my_first_smart_machine = dc.create_smart_machine(owner=user_uuid, networks=[network_uuid],
+        my_first_smart_machine = dc.create_smart_machine(owner=user_uuid, networks=[my_network_uuid],
                                                          package=package_small, image=smartmachine_image,
                                                          alias='my_first_smart_machine')
         self.assertIsNotNone(my_first_smart_machine.status())
@@ -81,7 +96,7 @@ class LifecycleTest(unittest.TestCase):
 
         # John wants to provision another machine, this time he wants to try a KVM machine
         # John provisions his second machine
-        my_first_kvm_machine = dc.create_kvm_machine(user_uuid, [network_uuid], package_small, kvm_image,
+        my_first_kvm_machine = dc.create_kvm_machine(user_uuid, [my_network_uuid], package_small, kvm_image,
                                                      'my_first_kvm_machine')
         self.assertIsNotNone(my_first_kvm_machine)
 
@@ -130,6 +145,14 @@ class LifecycleTest(unittest.TestCase):
         self.assertEqual(all_my_vms.__len__(), 0)
         self.assertEqual(all_my_smart_machines.__len__(), 0)
         self.assertEqual(all_my_kvm_machines.__len__(), 0)
+
+        # John keeps on rampaging and deletes his john_net.
+        my_network.delete()
+        my_network = dc.get_network(uuid=my_network_uuid)
+        self.assertIsNone(my_network)
+
+
+
 
         # John sees his work, two destroyed machines and decides to go to bed
 
