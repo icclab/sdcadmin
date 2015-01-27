@@ -19,6 +19,7 @@ import json
 import requests
 
 from .machine import SmartMachine, KVMMachine, Machine
+from .network import Network
 from .job import Job
 from .package import Package
 
@@ -193,3 +194,7 @@ class DataCenter(object):
     def get_package_raw(self, uuid):
         raw_package_data,  _ = self.request('GET', 'papi', '/packages/' + uuid)
         return raw_package_data
+
+    def list_networks(self):
+        raw_network_data, _ = self.request('GET', 'napi', '/networks')
+        return [Network(datacenter=self, data=network) for network in raw_network_data]

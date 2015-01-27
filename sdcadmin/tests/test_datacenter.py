@@ -19,6 +19,9 @@ import unittest
 from sdcadmin.tests.config.test_config import TestConfig
 from sdcadmin.datacenter import DataCenter
 from sdcadmin.machine import SmartMachine, KVMMachine
+from sdcadmin.network import Network
+
+from mock import MagicMock
 
 
 # a wild mix of unit and integration tests
@@ -110,3 +113,16 @@ class TestDataCenter(unittest.TestCase):
 
         test_kvm_ = self.dc.get_machine(test_kvm.uuid)
         self.assertEqual(test_kvm, test_kvm_)
+
+    def test_list_networks(self):
+
+        network_dummy_data = [{'uuid': 'foo'}, {'uuid': 'bar'}]
+        self.dc.request = MagicMock()
+        self.dc.request.return_value = (network_dummy_data, None)
+        networks = self.dc.list_networks()
+        self.dc.request.assert_called_once_with('GET', 'napi', '/networks')
+        self.assertEqual(networks.__len__(), 2)
+        self.assertEqual(networks.pop().uuid, 'bar')
+        self.assertEqual(networks.pop().uuid, 'foo')
+
+    def test_network_lifecycle
