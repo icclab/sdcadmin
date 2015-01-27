@@ -202,13 +202,9 @@ class DataCenter(object):
     # TODO: should get_* functions use uuid field in consturctor?
 
     def get_network(self, uuid):
-        data = self.get_network_raw(uuid)
-        if data.get('uuid'):
-            return Network(self, data)
-
-    def get_network_raw(self, uuid):
-        raw_network_data, _ = self.request('GET', 'napi', '/networks/' + uuid)
-        return raw_network_data
+        network = Network(self, uuid=uuid)
+        if network.uuid:
+            return network
 
     def create_network(self, name, owner_uuids, subnet, provision_start_ip, provision_end_ip, nic_tag,
                        gateway=None, vlan_id=0, resolvers=None, routes=None,  description=None):
@@ -233,9 +229,7 @@ class DataCenter(object):
         raw_job_data = self.__create_network(params)
         if not raw_job_data.get('uuid'):
             raise Exception('Could not create network')
-        uuid = raw_job_data.get('uuid')
-        network = self.get_network(uuid)
-        return network
+        return Network(datacenter=self, data=raw_job_data)
 
     def __create_network(self, params):
         raw_job_data, _ = self.request('POST', 'napi', '/networks', data=params)

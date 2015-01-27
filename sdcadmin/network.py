@@ -10,7 +10,9 @@ class Network(object):
         if not data:
             if not uuid:
                 raise Exception('Must pass either data or uuid')
-            data = self.dc.get_network_raw(uuid=uuid)
+            data, response = self.dc.request('GET', 'napi', '/networks/' + uuid)
+            if not data.get('uuid'):
+                return
         self._save(data)
 
     def _save(self, data):
