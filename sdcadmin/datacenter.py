@@ -156,22 +156,22 @@ class DataCenter(object):
         return raw_job_data
 
     def get_smart_machine(self, uuid):
-        return SmartMachine(self, self.get_machine_raw(uuid))
+        return SmartMachine(self, uuid=uuid)
 
     def get_kvm_machine(self, uuid):
-        return KVMMachine(self, self.get_machine_raw(uuid))
-
-    def get_machine_raw(self, uuid):
-        raw_vm_data, _ = self.request('GET', 'vmapi', '/vms/' + uuid)
-        return raw_vm_data
+        return KVMMachine(self, uuid=uuid)
 
     def get_machine(self, uuid):
-        raw_vm_data = self.get_machine_raw(uuid)
-        if raw_vm_data.get('brand') == 'joyent':
-            return SmartMachine(self, raw_vm_data)
-        if raw_vm_data.get('brand') == 'kvm':
-            return KVMMachine(self, raw_vm_data)
-        return None
+        machine = None
+        # retrieve a Class Machine object to check its brand
+        temp_machine = Machine(self, uuid=uuid)
+        if temp_machine.brand == 'joyent':
+            machine = SmartMachine(self, uuid=uuid)
+        if temp_machine.brand == 'kvm':
+            machine = KVMMachine(self, uuid=uuid)
+        if machine:
+            if machine.uuid:
+                return machine
 
     def list_jobs(self):
         raw_job_data, _ = self.request('GET', 'workflow', '/jobs')

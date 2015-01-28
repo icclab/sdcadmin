@@ -20,6 +20,7 @@ import time
 class Machine(object):
 
     uuid = ''
+    brand = ''
 
     api = 'vmapi'
     base_url = '/vms/'
@@ -97,8 +98,8 @@ class Machine(object):
 
 
 class SmartMachine(Machine):
-    def __init__(self, datacenter, data, machine_uuid=None):
-        super(SmartMachine, self).__init__(datacenter, data, machine_uuid)
+    def __init__(self, datacenter, data=None, uuid=None):
+        super(SmartMachine, self).__init__(datacenter, data, uuid)
 
     def __eq__(self, other):
         if isinstance(other, SmartMachine):
@@ -107,8 +108,8 @@ class SmartMachine(Machine):
 
 
 class KVMMachine(Machine):
-    def __init__(self, datacenter, data, machine_uuid=None):
-        super(KVMMachine, self).__init__(datacenter, data, machine_uuid)
+    def __init__(self, datacenter, data=None, uuid=None):
+        super(KVMMachine, self).__init__(datacenter, data, uuid)
 
     def __eq__(self, other):
         if isinstance(other, KVMMachine):
