@@ -45,3 +45,12 @@ class TestMachine(unittest.TestCase):
         self.assertEqual(getattr(smart_machine, 'foo'), 'not-bar')
         self.assertEqual(smart_machine.dc.request.call_count, 1)
 
+    def test_is_attached_to_network(self):
+
+        smart_machine_test_data = {'uuid': 'test',  'nics': [{'network_uuid': 'foo'}, {'network_uuid': 'bar'}]}
+        smart_machine = SmartMachine(datacenter=MagicMock(), data=smart_machine_test_data)
+        smart_machine.refresh = MagicMock()
+        self.assertTrue(smart_machine.is_attached_to_network('foo'))
+        self.assertTrue(smart_machine.is_attached_to_network('bar'))
+        self.assertFalse(smart_machine.is_attached_to_network('foobar'))
+

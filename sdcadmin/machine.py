@@ -21,6 +21,7 @@ class Machine(object):
 
     uuid = ''
     brand = ''
+    nics = ''
 
     api = 'vmapi'
     base_url = '/vms/'
@@ -48,6 +49,9 @@ class Machine(object):
         for k, v in data.iteritems():
             setattr(self, k, v)
 
+    def url(self):
+        return self.base_url + self.uuid
+
     def status(self):
         status_data, _ = self.dc.request('GET', self.api, '/statuses', params={'uuids': self.uuid})
         state = status_data.get(self.uuid)
@@ -55,7 +59,7 @@ class Machine(object):
         return state
 
     def refresh(self):
-        data, _ = self.dc.request('GET', self.api, self.base_url + self.uuid)
+        data, _ = self.dc.request('GET', self.api, self.url())
         self._save(data)
 
     def is_running(self):
@@ -67,14 +71,31 @@ class Machine(object):
     def is_stopped(self):
         return self.status() == self.STATE_STOPPED
 
+    def is_attached_to_network(self, network_uuid):
+        self.refresh()
+        return [True for nic in self.nics if nic.get('network_uuid') == network_uuid].__len__()>=1
 
     def stop(self):
-        raw_job_data, response = self.dc.request('POST', self.api, self.base_url + self.uuid + '?action=stop')
+        raw_job_data, response = self.dc.request('POST', self.api, self.url() + '?action=stop')
         response.raise_for_status()
 
     def start(self):
-        raw_job_data, response = self.dc.request('POST', self.api, self.base_url + self.uuid + '?action=start')
+        raw_job_data, response = self.dc.request('POST', self.api, self.url() + '?action=start')
         response.raise_for_status()
+
+    def delete(self):
+        raw_job_data, response = self.dc.request('DELETE', self.api, self.url())
+        response.raise_for_status()
+
+    def add_nic(self, network_uuid):
+        params = { 'networks' : [{'uuid': network_uuid}] }
+        raw_job_data, response = self.dc.request('POST', self.api, self.url() + '?action=add_nics', data=params)
+        if not raw_job_data.get('vm_uuid'):
+            raise Exception('Could not attach nic to vm')
+
+        self.refresh()
+
+
 
     def poll_until(self, status):
         while not self.status() == status:
@@ -92,9 +113,7 @@ class Machine(object):
         self.state = status
         return
 
-    def delete(self):
-        raw_job_data, response = self.dc.request('DELETE', self.api, self.base_url + self.uuid)
-        response.raise_for_status()
+
 
 
 class SmartMachine(Machine):

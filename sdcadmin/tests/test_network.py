@@ -42,12 +42,13 @@ class TestNetwork(unittest.TestCase):
 
     def test_create_network_from_uuid(self):
         dc = MagicMock()
-        dc.get_network_raw = MagicMock()
-        dc.get_network_raw.return_value = {'uuid': 'foo', 'foo': 'bar'}
+        dc.request = MagicMock()
+        dc.request.return_value = ({'uuid': 'foo', 'foo': 'bar'}, None)
         network = Network(datacenter=dc, uuid='foo')
-        dc.get_network_raw.assert_called_once_with(uuid='foo')
+        dc.request.assert_called_once_with('GET', 'napi', '/networks/foo')
         self.assertEqual(network.uuid, 'foo')
         self.assertEqual(network.foo, 'bar')
+
 
     def test_refresh(self):
 

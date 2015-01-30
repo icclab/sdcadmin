@@ -3,7 +3,7 @@ __author__ = 'ernm'
 class Package(object):
     owner_uuids = []
     uuid = ''
-
+    quota = ''
 
     api = 'papi'
     base_url = '/packages/'
