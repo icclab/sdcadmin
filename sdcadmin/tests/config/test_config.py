@@ -31,12 +31,12 @@ class TestConfig(object):
 
     # vm
     #@adminui: manual retrieval
-    user_uuid = 'ca50e0a6-0f87-c911-fb01-e139514f760f'
-    package_small = 'a8c2033d-e8eb-c17e-83ce-b10e36f1339b'
-    package_big = '395ecfd6-3050-4082-ea25-9b51ad72873d'
-    smartmachine_image = '859e9466-7ef4-11e4-b103-27886e7d9a7d'
-    kvm_image = 'b1df4936-7a5c-11e4-98ed-dfe1fa3a813a'
-    external_network_uuid = 'f27c02f1-5b4c-4ef1-b463-59c7e60f02e5'
+    user_uuid = '72f70341-b227-4051-befd-b0d5e1588a6d'
+    package_small = 'b1abec1a-80e5-ea9e-e091-8f2d67feb252'
+    package_big = '930896af-bf8c-48d4-885c-6573a94b1853'
+    smartmachine_image = '62f148f8-6e84-11e4-82c5-efca60348b9f'
+    kvm_image = '02dbab66-a70a-11e4-819b-b3dc41b361d6'
+    external_network_uuid = 'f3d68d27-e311-491a-9c7f-d2a8d386e6e6'
 
     # network
     network_name='foo_net'
@@ -49,4 +49,8 @@ class TestConfig(object):
     resolvers=['8.8.8.8', '8.8.4.4']
     routes={'10.11.0.0/24': '10.10.0.50'}
     network_description='foo_net_desc'
+    test_ip_1='10.10.0.121'
+    test_ip_2='10.10.0.122'
+    test_ip_3='10.10.0.123'
+    test_ip_4='10.10.0.124'
 

@@ -87,14 +87,27 @@ class Machine(object):
         raw_job_data, response = self.dc.request('DELETE', self.api, self.url())
         response.raise_for_status()
 
-    def add_nic(self, network_uuid):
+    def add_nic(self, network_uuid, ip=None):
         params = { 'networks' : [{'uuid': network_uuid}] }
+        if ip:
+            params = { 'networks' : [{'uuid': network_uuid, 'ip': ip}] }
         raw_job_data, response = self.dc.request('POST', self.api, self.url() + '?action=add_nics', data=params)
         if not raw_job_data.get('vm_uuid'):
             raise Exception('Could not attach nic to vm')
-
         self.refresh()
 
+    def remove_nic(self, mac_address):
+        self.refresh()
+        nics = [ nic for nic in self.nics if nic['mac'] == mac_address]
+        if nics.__len__() == 0:
+            raise Exception('nic with provided mac address not found')
+        network_uuid = nics[0].get('network_uuid')
+
+        params = { 'macs' : [mac_address] }
+        raw_job_data, response = self.dc.request('POST', self.api, self.url() + '?action=remove_nics', data=params)
+        if not raw_job_data.get('vm_uuid'):
+            raise Exception('Could not remove nic from vm')
+        self.refresh()
 
 
     def poll_until(self, status):

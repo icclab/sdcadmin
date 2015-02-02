@@ -15,6 +15,7 @@
 __author__ = 'ernm'
 
 import unittest
+import time
 
 from sdcadmin.tests.config.test_config import TestConfig
 
@@ -38,7 +39,7 @@ class LifecycleTest(unittest.TestCase):
         kvm_image = TestConfig.kvm_image
 
         # and the external network:
-        network_uuid = TestConfig.external_network_uuid
+        external_network_uuid = TestConfig.external_network_uuid
 
 
         # John, curious as he is, imports the library
@@ -81,7 +82,7 @@ class LifecycleTest(unittest.TestCase):
 
 
         # John creates a first smartmachine and is pleased
-        my_first_smart_machine = dc.create_smart_machine(owner=user_uuid, networks=[my_network_uuid],
+        my_first_smart_machine = dc.create_smart_machine(owner=user_uuid, networks=[external_network_uuid],
                                                          package=package_small, image=smartmachine_image,
                                                          alias='my_first_smart_machine')
         self.assertIsNotNone(my_first_smart_machine.status())
@@ -106,7 +107,7 @@ class LifecycleTest(unittest.TestCase):
 
         # John wants to provision another machine, this time he wants to try a KVM machine
         # John provisions his second machine
-        my_first_kvm_machine = dc.create_kvm_machine(user_uuid, [my_network_uuid], package_small, kvm_image,
+        my_first_kvm_machine = dc.create_kvm_machine(user_uuid, [external_network_uuid], package_small, kvm_image,
                                                      'my_first_kvm_machine')
         self.assertIsNotNone(my_first_kvm_machine)
 
@@ -120,6 +121,36 @@ class LifecycleTest(unittest.TestCase):
         all_my_kvm_machines = dc.list_kvm_machines(owner_uuid=user_uuid, state=dc.STATE_RUNNING)
         self.assertEqual(all_my_vms.__len__(), 2)
         self.assertEqual(all_my_kvm_machines.__len__(), 1)
+
+        # John wants to give his machines access to his private network
+        my_first_kvm_machine.add_nic(network_uuid=my_network_uuid, ip=TestConfig.test_ip_1)
+
+        # John grabs a coffee
+        time.sleep(30) # FIXME: add_nic has no blocking method
+
+        self.assertTrue(my_first_kvm_machine.is_attached_to_network(my_network_uuid))
+        my_first_kvm_machine.refresh()
+        my_first_kvm_machine.remove_nic(my_first_kvm_machine.nics[1].get('mac'))
+        time.sleep(30)  # FIXME: add_nic has no blocking method
+        my_first_kvm_machine.refresh()
+        self.assertFalse(my_first_kvm_machine.is_attached_to_network(my_network_uuid))
+
+
+        my_first_smart_machine.add_nic(network_uuid=my_network_uuid, ip=TestConfig.test_ip_2)
+        time.sleep(30)
+        self.assertTrue(my_first_smart_machine.is_attached_to_network(my_network_uuid))
+
+        # John does a quick refresh
+        my_first_smart_machine.refresh()
+
+        # John wants to remove the external network from his machine again.
+        my_first_smart_machine.remove_nic(my_first_smart_machine.nics[1].get('mac'))
+
+        # John grabs another coffee
+        time.sleep(30)
+
+        self.assertFalse(my_first_smart_machine.is_attached_to_network(my_network_uuid))
+
 
         # John now gets tired, he did provision 2 servers after all.
         # He decides to remove the kvm machine first
