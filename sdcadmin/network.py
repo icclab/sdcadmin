@@ -3,6 +3,8 @@ __author__ = 'ernm'
 class Network(object):
 
     uuid = ''
+    vlan_id = ''
+    subnet = ''
 
 
     api = 'napi'

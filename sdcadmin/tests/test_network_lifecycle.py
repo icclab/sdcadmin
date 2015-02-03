@@ -54,3 +54,16 @@ class TestLifeCycleNetwork(unittest.TestCase):
 
 
 
+    def test_smart_network_lifecycle(self):
+        my_smart_network = self.dc.create_smart_network(name=self.config.network_name,
+                                            owner_uuids=[self.config.user_uuid],
+                                            description=self.config.network_description)
+        self.assertIsInstance(my_smart_network, Network)
+        self.assertIsNotNone(my_smart_network.uuid)
+
+        my_network_ = self.dc.get_network(uuid=my_smart_network.uuid)
+        self.assertEqual(my_smart_network, my_network_)
+
+        my_smart_network.delete()
+        my_network_ = self.dc.get_network(uuid=my_smart_network.uuid)
+        self.assertIsNone(my_network_, 'network still exists')

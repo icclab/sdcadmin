@@ -18,6 +18,8 @@ import json
 
 import requests
 
+from netaddr import IPNetwork
+
 from .machine import SmartMachine, KVMMachine, Machine
 from .network import Network
 from .job import Job
@@ -32,6 +34,8 @@ class DataCenter(object):
     STATE_DESTROYED = Machine.STATE_DESTROYED
     STATE_PROVISIONING = Machine.STATE_PROVISIONING
     STATE_STOPPED = Machine.STATE_STOPPED
+    TENANT_NET = '10.0.0.0/8'
+    TENANT_NIC_TAG = 'customer'
 
     def request(self, method, api, path, headers=None, data=None, **kwargs):
         full_path = getattr(self, api) + path
@@ -225,6 +229,31 @@ class DataCenter(object):
             raise Exception('Could not create network')
         return Network(datacenter=self, data=raw_job_data)
 
+    def create_smart_network(self, name, owner_uuids, mask_bits=24, description=None):
+        vlan_id = self.next_free_vlan()
+        subnet = self.next_free_network(mask_bits)
+        net = IPNetwork(subnet)
+
+        return self.create_network(name=name, owner_uuids=owner_uuids, subnet=subnet, provision_start_ip=net[1].__str__(),
+                                   provision_end_ip=net[-2].__str__(), nic_tag=self.TENANT_NIC_TAG, vlan_id=vlan_id,
+                                   description=description)
+
+
     def __create_network(self, params):
         raw_job_data, _ = self.request('POST', 'napi', '/networks', data=params)
         return raw_job_data
+
+    def next_free_vlan(self):
+        used_vlans = [network.vlan_id for network in self.list_networks()]
+        for vlan in xrange(2, 4096):
+            if not vlan in used_vlans:
+                return vlan
+        return None
+
+    def next_free_network(self, mask_bits=24):
+
+        used_subnets = [IPNetwork(network.subnet) for network in self.list_networks()]
+        possible_subnets = IPNetwork(self.TENANT_NET).subnet(mask_bits)
+        for candidate in possible_subnets:
+            if not any([any([ip in subnet for ip in list(candidate)]) for subnet in used_subnets]):
+                return candidate.__str__()

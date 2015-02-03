@@ -124,3 +124,97 @@ class TestDataCenter(unittest.TestCase):
         self.assertEqual(networks.__len__(), 2)
         self.assertEqual(networks.pop().uuid, 'bar')
         self.assertEqual(networks.pop().uuid, 'foo')
+
+
+    def test_find_next_free_vlan(self):
+
+        self.dc.request = MagicMock()
+
+        raw_network_data = [
+            {u'vlan_id': 0},
+            {u'vlan_id': 0},
+            {u'vlan_id': 1337}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_vlan(), 2)
+
+        raw_network_data = [
+            {u'vlan_id': 0},
+            {u'vlan_id': 1},
+            {u'vlan_id': 2}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_vlan(), 3)
+
+        raw_network_data = [
+            {u'vlan_id': 2},
+            {u'vlan_id': 1},
+            {u'vlan_id': 0}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_vlan(), 3)
+
+        raw_network_data = [
+            {u'vlan_id': 3},
+            {u'vlan_id': 1},
+            {u'vlan_id': 2}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_vlan(), 4)
+
+        raw_network_data = [{u'vlan_id': i } for i in xrange(0,4096)]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_vlan(), None)
+
+    def test_find_next_free_network(self):
+
+        self.dc.request = MagicMock()
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.0.0/24'},
+            {u'subnet': u'10.0.1.0/24'},
+            {u'subnet': u'10.0.2.0/24'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(24), '10.0.3.0/24')
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.2.0/24'},
+            {u'subnet': u'10.0.1.0/24'},
+            {u'subnet': u'10.0.0.0/24'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(24), '10.0.3.0/24')
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.0.0/23'},
+            {u'subnet': u'10.0.2.0/25'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(25), '10.0.2.128/25')
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.0.0/23'},
+            {u'subnet': u'10.0.1.0/24'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(24), '10.0.2.0/24')
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.0.0/22'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(24), '10.0.4.0/24')
+
+        raw_network_data = [
+            {u'subnet': u'192.168.2.0/24'},
+            {u'subnet': u'10.0.0.0/25'}
+        ]
+        self.dc.request.return_value = ( raw_network_data, None )
+        self.assertEqual(self.dc.next_free_network(24), '10.0.1.0/24')
+
