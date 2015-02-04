@@ -36,6 +36,7 @@ class DataCenter(object):
     STATE_STOPPED = Machine.STATE_STOPPED
     TENANT_NET = '10.0.0.0/8'
     TENANT_NIC_TAG = 'customer'
+    TENANT_VLAN_RANGE = xrange(2, 4096)
 
     def request(self, method, api, path, headers=None, data=None, **kwargs):
         full_path = getattr(self, api) + path
@@ -126,7 +127,7 @@ class DataCenter(object):
         raw_job_data = self.__create_machine(params)
         # TODO: error handling
         if not raw_job_data.get('vm_uuid'):
-            raise Exception('Could not create SmartMachine')
+            raise Exception('Could not create SmartMachine: %s' % repr(raw_job_data))
         vm_uuid = raw_job_data.get('vm_uuid')
         vm = self.get_smart_machine(vm_uuid)
         vm.creation_job_uuid = raw_job_data.get('job_uuid')
@@ -149,7 +150,7 @@ class DataCenter(object):
 
         raw_job_data = self.__create_machine(params)
         if not raw_job_data.get('vm_uuid'):
-            raise Exception('Could not create KVM VM')
+            raise Exception('Could not create KVM VM: %s' % repr(raw_job_data))
         vm_uuid = raw_job_data.get('vm_uuid')
         vm = self.get_kvm_machine(vm_uuid)
         vm.creation_job_uuid = raw_job_data.get('job_uuid')
@@ -226,7 +227,7 @@ class DataCenter(object):
 
         raw_job_data = self.__create_network(params)
         if not raw_job_data.get('uuid'):
-            raise Exception('Could not create network')
+            raise Exception('Could not create network: %s' % repr(raw_job_data))
         return Network(datacenter=self, data=raw_job_data)
 
     def create_smart_network(self, name, owner_uuids, mask_bits=24, description=None):
@@ -245,7 +246,7 @@ class DataCenter(object):
 
     def next_free_vlan(self):
         used_vlans = [network.vlan_id for network in self.list_networks()]
-        for vlan in xrange(2, 4096):
+        for vlan in self.TENANT_VLAN_RANGE:
             if not vlan in used_vlans:
                 return vlan
         return None
