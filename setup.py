@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name='sdcadmin',
-    version='0.1',
+    version='0.2',
     packages=['sdcadmin', 'sdcadmin.tests', 'sdcadmin.tests.config'],
     url='https://github.com/icclab/sdcadmin',
     license='Apache License, Version 2.0',
@@ -25,6 +25,7 @@ setup(
     author_email='ernm@zhaw.ch',
     description='API wrapper for the SDC APIs on the admin network',
     install_requires=[
-        'requests>=2.5.1'
+        'requests>=2.5.1',
+        'netaddr>=0.7.12'
     ]
 )
