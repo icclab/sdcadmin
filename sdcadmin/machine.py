@@ -126,7 +126,22 @@ class Machine(object):
         self.state = status
         return
 
+    def update_metadata(self, field, data):
+        if field not in ['customer_metadata', 'internal_metadata', 'tags']:
+            raise ValueError('field must be one of customer_metadata, internal_metadata or tags')
+        raw_job_data, response = self.dc.request('PUT', 'vmapi', '/vms/%s/%s' % (self.uuid, field), data=data)
+        if not raw_job_data.get('vm_uuid'):
+            raise Exception('Could not update metadata for VM: %s' % repr(raw_job_data))
+        return True
 
+    def update_customer_metadata(self, data):
+        return self.update_metadata(field='customer_metadata', data=data)
+
+    def update_internal_metadata(self, data):
+        return self.update_metadata(field='internal_metadata', data=data)
+
+    def update_tags(self, data):
+        return self.update_metadata(field='tags', data=data)
 
 
 class SmartMachine(Machine):

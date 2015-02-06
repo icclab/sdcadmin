@@ -54,3 +54,52 @@ class TestMachine(unittest.TestCase):
         self.assertTrue(smart_machine.is_attached_to_network('bar'))
         self.assertFalse(smart_machine.is_attached_to_network('foobar'))
 
+
+    def test_update_specific_metadata(self):
+
+        old = {'foo': 'bar'}
+        new = {'foo2': 'bar2'}
+        smart_machine_test_data = {'uuid': 'test',
+                                   'customer_metadata': old,
+                                   'internal_metadata': old,
+                                   'tags': old}
+
+        smart_machine = SmartMachine(datacenter=MagicMock(), data=smart_machine_test_data)
+        smart_machine.update_metadata = MagicMock()
+
+
+        smart_machine.update_customer_metadata(data=new)
+        smart_machine.update_metadata.assert_called_with(field='customer_metadata', data=new)
+        smart_machine.update_internal_metadata(data=new)
+        smart_machine.update_metadata.assert_called_with(field='internal_metadata', data=new)
+        smart_machine.update_tags(data=new)
+        smart_machine.update_metadata.assert_called_with(field='tags', data=new)
+
+
+    def test_update_metadata(self):
+        old = {'foo': 'bar'}
+        new = {'foo2': 'bar2'}
+        smart_machine_test_data = {'uuid': 'test',
+                                   'customer_metadata': old,
+                                   'internal_metadata': old,
+                                   'tags': old}
+        smart_machine = SmartMachine(datacenter=MagicMock(), data=smart_machine_test_data)
+        smart_machine.dc.request = MagicMock()
+        smart_machine.dc.request.return_value = ({'vm_uuid': 'test'}, None)
+
+        smart_machine.update_metadata(field='customer_metadata', data=new)
+        smart_machine.dc.request.assert_called_once_with('PUT', 'vmapi',
+                                                         '/vms/%s/customer_metadata' % smart_machine.uuid, data=new)
+        smart_machine.dc.request.reset_mock()
+
+        smart_machine.update_metadata(field='internal_metadata', data=new)
+        smart_machine.dc.request.assert_called_once_with('PUT', 'vmapi',
+                                                         '/vms/%s/internal_metadata' % smart_machine.uuid, data=new)
+
+        smart_machine.dc.request.reset_mock()
+
+        smart_machine.update_metadata(field='tags', data=new)
+        smart_machine.dc.request.assert_called_once_with('PUT', 'vmapi',
+                                                         '/vms/%s/tags' % smart_machine.uuid, data=new)
+
+        smart_machine.dc.request.reset_mock()
