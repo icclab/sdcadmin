@@ -28,9 +28,11 @@ class TestConfig(object):
     napi_ip = '10.0.0.4'
     papi_ip = '10.0.0.23'
     workflow_ip = '10.0.0.13'
+    ufds_ip = '10.0.0.12'
 
     # vm
     #@adminui: manual retrieval
+    admin_uuid = '930896af-bf8c-48d4-885c-6573a94b1853'
     user_uuid = '72f70341-b227-4051-befd-b0d5e1588a6d'
     package_small = 'b1abec1a-80e5-ea9e-e091-8f2d67feb252'
     package_big = '930896af-bf8c-48d4-885c-6573a94b1853'

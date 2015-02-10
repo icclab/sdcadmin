@@ -22,6 +22,7 @@ class Machine(object):
     uuid = ''
     brand = ''
     nics = ''
+    customer_metadata = {}
 
     api = 'vmapi'
     base_url = '/vms/'

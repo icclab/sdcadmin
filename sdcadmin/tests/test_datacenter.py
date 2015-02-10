@@ -34,10 +34,10 @@ class TestDataCenter(unittest.TestCase):
 
 
     def test_known_datacenter_apis_are_visible(self):
-        self.assertEqual(DataCenter.APIS, ['sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow'])
+        self.assertEqual(DataCenter.APIS, ['sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow', 'ufds'])
 
     def test_create_with_manual_urls(self):
-        self.dc2 = DataCenter('sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow')
+        self.dc2 = DataCenter('sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow', 'ufds')
         for api in DataCenter.APIS:
             self.assertEqual(getattr(self.dc2, api), 'http://' + api)
 
@@ -50,6 +50,7 @@ class TestDataCenter(unittest.TestCase):
         self.assertEqual(self.dc.napi, 'http://' + self.config.napi_ip)
         self.assertEqual(self.dc.papi, 'http://' + self.config.papi_ip)
         self.assertEqual(self.dc.workflow, 'http://' + self.config.workflow_ip)
+        self.assertEqual(self.dc.ufds, 'http://' + self.config.ufds_ip)
 
 
     def test_health_check_vmapi(self):
@@ -218,3 +219,9 @@ class TestDataCenter(unittest.TestCase):
         self.dc.request.return_value = ( raw_network_data, None )
         self.assertEqual(self.dc.next_free_network(24), '10.0.1.0/24')
 
+
+
+    def test_get_keys(self):
+        # FIXME: needs more testing
+        admin_pubkeys = self.dc.get_pubkeys(user_uuid=self.config.admin_uuid, ignore_cert=True)
+        self.assertGreater(admin_pubkeys.__len__(), 0)

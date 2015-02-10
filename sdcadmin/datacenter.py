@@ -18,16 +18,19 @@ import json
 
 import requests
 
+import ldap
+
 from netaddr import IPNetwork
 
 from .machine import SmartMachine, KVMMachine, Machine
 from .network import Network
 from .job import Job
 from .package import Package
+import mdata
 
 
 class DataCenter(object):
-    APIS = ['sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow']
+    APIS = ['sapi', 'vmapi', 'fwapi', 'imgapi', 'napi', 'papi', 'workflow', 'ufds']
     default_headers = {'Content-Type': 'application/json'}
     STATE_RUNNING = Machine.STATE_RUNNING
     STATE_FAILED = Machine.STATE_FAILED
@@ -68,7 +71,7 @@ class DataCenter(object):
         instance = resp.pop()
         return instance.get('metadata').get('ADMIN_IP')
 
-    def __init__(self, sapi, vmapi=None, fwapi=None, imgapi=None, napi=None, papi=None, workflow=None):
+    def __init__(self, sapi, vmapi=None, fwapi=None, imgapi=None, napi=None, papi=None, workflow=None, ufds=None):
         self.sapi = 'http://' + sapi
 
         self.vmapi = 'http://' + (vmapi or self.get_ip_for_service('vmapi'))
@@ -77,6 +80,7 @@ class DataCenter(object):
         self.napi = 'http://' + (napi or self.get_ip_for_service('napi'))
         self.papi = 'http://' + (papi or self.get_ip_for_service('papi'))
         self.workflow = 'http://' + (workflow or self.get_ip_for_service('workflow'))
+        self.ufds = 'http://' + (ufds or self.get_ip_for_service('ufds'))
 
     def healthcheck_vmapi(self):
         health_data, _ = self.request('GET', 'vmapi', '/ping')
@@ -112,7 +116,8 @@ class DataCenter(object):
         vms, _ = self.request('GET', 'vmapi', '/vms', params=params)
         return vms
 
-    def create_smart_machine(self, owner, networks, package, image, alias=None, user_script=""):
+    def create_smart_machine(self, owner, networks, package, image, alias=None, user_script="",
+                             inject_rerunable_userscript_functionality=False):
 
         params = {'brand': 'joyent', 'owner_uuid': owner, 'networks': networks, 'billing_id': package,
                   'image_uuid': image}
@@ -120,9 +125,21 @@ class DataCenter(object):
         if alias:
             params.update({'alias': alias})
 
-        metadata = {}
+        customer_metadata = {}
         if user_script:
-            metadata.update({'user-script': user_script})
+            customer_metadata.update({'user-script': user_script})
+
+
+            if inject_rerunable_userscript_functionality:
+                internal_metadata = {}
+                internal_metadata.update({'operator-script': mdata.script})
+                params.update({'internal_metadata': internal_metadata})
+
+
+        keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
+        customer_metadata.update({'root_authorized_keys': '\n'.join(keys)})
+
+        params.update({'customer_metadata': customer_metadata})
 
         raw_job_data = self.__create_machine(params)
         # TODO: error handling
@@ -133,7 +150,8 @@ class DataCenter(object):
         vm.creation_job_uuid = raw_job_data.get('job_uuid')
         return vm
 
-    def create_kvm_machine(self, owner, networks, package, image, alias=None, user_script=""):
+    def create_kvm_machine(self, owner, networks, package, image, alias=None, user_script="",
+                             inject_rerunable_userscript_functionality=False):
         package_obj = Package(datacenter=self, uuid=package)
 
         params = {'brand': 'kvm',
@@ -144,9 +162,22 @@ class DataCenter(object):
                             {'size': package_obj.quota}]}
         if alias:
             params.update({'alias': alias})
-        metadata = {}
+        customer_metadata = {}
         if user_script:
-            metadata.update({'user-script': user_script})
+            customer_metadata.update({'user-script': user_script})
+
+
+            if inject_rerunable_userscript_functionality:
+                internal_metadata = {}
+                internal_metadata.update({'operator-script': mdata.script})
+                internal_metadata.update({'mdata-delete-base64': mdata.linux['delete']})
+                params.update({'internal_metadata': internal_metadata})
+
+        keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
+        customer_metadata.update({'root_authorized_keys': '\n'.join(keys)})
+
+        params.update({'customer_metadata': customer_metadata})
+
 
         raw_job_data = self.__create_machine(params)
         if not raw_job_data.get('vm_uuid'):
@@ -258,3 +289,31 @@ class DataCenter(object):
         for candidate in possible_subnets:
             if not any([any([ip in subnet for ip in list(candidate)]) for subnet in used_subnets]):
                 return candidate.__str__()
+
+    def get_pubkeys(self, user_uuid, ignore_cert=False):
+        # TODO: error handling, implement user class
+
+        if ignore_cert:
+            ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+
+        l = ldap.initialize('ldaps://%s' % self.ufds.split('//')[1])
+
+        scope = ldap.SCOPE_SUBTREE
+        baseDN = 'uuid=%s, ou=users, o=smartdc' % user_uuid
+        filterString = '(objectclass=sdckey)'
+
+        # FIXME: externalise
+        l.bind_s('cn=root', 'secret')
+
+        ldap_result_id = l.search(baseDN, scope, filterString)
+        result_set = []
+        while 1:
+            result_type, result_data = l.result(ldap_result_id, 0)
+            if result_data == []:
+                break
+            else:
+                if result_type == ldap.RES_SEARCH_ENTRY:
+                    result_set.append(result_data)
+
+
+        return [result[0][1]['openssh'][0] for result in result_set]
