@@ -30,7 +30,7 @@ from mock import MagicMock
 class TestDataCenter(unittest.TestCase):
     def setUp(self):
         self.config = TestConfig()
-        self.dc = DataCenter(sapi=self.config.sapi_ip)
+        self.dc = DataCenter(sapi=self.config.sapi_ip, vmapi=self.config.vmapi_ip)
 
 
     def test_known_datacenter_apis_are_visible(self):

@@ -30,7 +30,7 @@ class TestJob(unittest.TestCase):
 
     def setUp(self):
         self.config = TestConfig()
-        self.dc = DataCenter(sapi=self.config.sapi_ip)
+        self.dc = DataCenter(sapi=self.config.sapi_ip, vmapi=self.config.vmapi_ip)
 
     def test_retrieve_all_jobs(self):
         all_jobs = self.dc.list_jobs()

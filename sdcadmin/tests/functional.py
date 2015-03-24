@@ -46,7 +46,7 @@ class LifecycleTest(unittest.TestCase):
         from sdcadmin.datacenter import DataCenter
 
         # John creates a datacenter with the sapi information he was provided
-        dc = DataCenter(sapi=sapi_ip)
+        dc = DataCenter(sapi=sapi_ip, vmapi=self.config.vmapi_ip)
         self.assertTrue(dc.healthcheck_vmapi())
 
         # John does not want his machines to be public. He looks around for other networks

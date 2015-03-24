@@ -31,7 +31,7 @@ from sdcadmin.network import Network
 class TestLifeCycleVMandNetwork(unittest.TestCase):
     def setUp(self):
         self.config = TestConfig()
-        self.dc = DataCenter(sapi=self.config.sapi_ip)
+        self.dc = DataCenter(sapi=self.config.sapi_ip, vmapi=self.config.vmapi_ip)
 
     def test_attach_nics_to_machines(self):
 

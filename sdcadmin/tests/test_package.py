@@ -8,7 +8,7 @@ from sdcadmin.tests.config.test_config import TestConfig
 
 class TestPackages(unittest.TestCase):
     def setUp(self):
-        self.dc = DataCenter(sapi=TestConfig.sapi_ip)
+        self.dc = DataCenter(sapi=TestConfig.sapi_ip, vmapi=self.config.vmapi_ip)
 
     def test_list_all_packages(self):
         packages = self.dc.list_packages()

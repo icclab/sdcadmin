@@ -37,9 +37,11 @@ class DataCenter(object):
     STATE_DESTROYED = Machine.STATE_DESTROYED
     STATE_PROVISIONING = Machine.STATE_PROVISIONING
     STATE_STOPPED = Machine.STATE_STOPPED
+
     TENANT_NET = '10.0.0.0/8'
     TENANT_NIC_TAG = 'customer'
     TENANT_VLAN_RANGE = xrange(2, 4096)
+
 
     def request(self, method, api, path, headers=None, data=None, **kwargs):
         full_path = getattr(self, api) + path
@@ -69,12 +71,19 @@ class DataCenter(object):
         if not resp:
             raise EnvironmentError('Could not retrieve instance information for service uuid %s' % service.get('uuid'))
         instance = resp.pop()
-        return instance.get('metadata').get('ADMIN_IP')
+        resp, _ = self.request('GET', 'vmapi', '/vms', params={'uuid': instance.get('uuid')})
+        if not resp:
+            raise EnvironmentError('Could not retrieve vm %s' % instance.get('uuid'))
+        vm = resp.pop()
+        nics = vm.get('nics')
+        for nic in nics:
+            if nic.get('nic_tag') == 'admin':
+                return nic.get('ip')
+        raise EnvironmentError('No IP on admin network found for instance %s' % instance.get('uuid'))
 
-    def __init__(self, sapi, vmapi=None, fwapi=None, imgapi=None, napi=None, papi=None, workflow=None, ufds=None):
+    def __init__(self, sapi, vmapi, fwapi=None, imgapi=None, napi=None, papi=None, workflow=None, ufds=None):
         self.sapi = 'http://' + sapi
-
-        self.vmapi = 'http://' + (vmapi or self.get_ip_for_service('vmapi'))
+        self.vmapi = 'http://' + vmapi
         self.fwapi = 'http://' + (fwapi or self.get_ip_for_service('fwapi'))
         self.imgapi = 'http://' + (imgapi or self.get_ip_for_service('imgapi'))
         self.napi = 'http://' + (napi or self.get_ip_for_service('napi'))
