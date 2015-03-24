@@ -117,7 +117,7 @@ class DataCenter(object):
         return vms
 
     def create_smart_machine(self, owner, networks, package, image, alias=None, user_script="",
-                             inject_rerunable_userscript_functionality=False):
+                             inject_rerunable_userscript_functionality=False, ssh_keys=False):
 
         params = {'brand': 'joyent', 'owner_uuid': owner, 'networks': networks, 'billing_id': package,
                   'image_uuid': image}
@@ -135,9 +135,9 @@ class DataCenter(object):
                 internal_metadata.update({'operator-script': mdata.script})
                 params.update({'internal_metadata': internal_metadata})
 
-
-        keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
-        customer_metadata.update({'root_authorized_keys': '\n'.join(keys)})
+        if not ssh_keys:
+            ssh_keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
+        customer_metadata.update({'root_authorized_keys': '\n'.join(ssh_keys)})
 
         params.update({'customer_metadata': customer_metadata})
 
@@ -151,7 +151,7 @@ class DataCenter(object):
         return vm
 
     def create_kvm_machine(self, owner, networks, package, image, alias=None, user_script="",
-                             inject_rerunable_userscript_functionality=False):
+                           inject_rerunnable_userscript_functionality=False, ssh_keys=False):
         package_obj = Package(datacenter=self, uuid=package)
 
         params = {'brand': 'kvm',
@@ -167,14 +167,15 @@ class DataCenter(object):
             customer_metadata.update({'user-script': user_script})
 
 
-            if inject_rerunable_userscript_functionality:
+            if inject_rerunnable_userscript_functionality:
                 internal_metadata = {}
                 internal_metadata.update({'operator-script': mdata.script})
                 internal_metadata.update({'mdata-delete-base64': mdata.linux['delete']})
                 params.update({'internal_metadata': internal_metadata})
 
-        keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
-        customer_metadata.update({'root_authorized_keys': '\n'.join(keys)})
+        if not ssh_keys:
+            ssh_keys = self.get_pubkeys(user_uuid=owner, ignore_cert=True)
+        customer_metadata.update({'root_authorized_keys': '\n'.join(ssh_keys)})
 
         params.update({'customer_metadata': customer_metadata})
 
