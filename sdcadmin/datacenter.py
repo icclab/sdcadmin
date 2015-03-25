@@ -27,6 +27,7 @@ from .network import Network
 from .job import Job
 from .package import Package
 import mdata
+from ConfigParser import SafeConfigParser
 
 
 class DataCenter(object):
@@ -41,6 +42,20 @@ class DataCenter(object):
     TENANT_NET = '10.0.0.0/8'
     TENANT_NIC_TAG = 'customer'
     TENANT_VLAN_RANGE = xrange(2, 4096)
+
+    SDCADMIN_CONFIG_FILE = '/etc/sdcadmin/sdcadmin.conf'
+
+    cfg_parser = SafeConfigParser()
+    cfg_parser.read(SDCADMIN_CONFIG_FILE)
+
+    if cfg_parser.has_section('NETWORK'):
+        if cfg_parser.has_option('NETWORK', 'TENANT_NET'):
+                TENANT_NET = cfg_parser.get('NETWORK', 'TENANT_NET')
+        if cfg_parser.has_option('NETWORK', 'TENANT_NIC_TAG'):
+                TENANT_NIC_TAG = cfg_parser.get('NETWORK', 'TENANT_NIC_TAG')
+        if cfg_parser.has_option('NETWORK', 'TENANT_VLAN'):
+                CONF_TENANT_VLAN = cfg_parser.get('NETWORK', 'TENANT_VLAN')
+                TENANT_VLAN_RANGE = xrange(CONF_TENANT_VLAN.split(':')[0], CONF_TENANT_VLAN.split(':')[1])
 
 
     def request(self, method, api, path, headers=None, data=None, **kwargs):
@@ -126,7 +141,7 @@ class DataCenter(object):
         return vms
 
     def create_smart_machine(self, owner, networks, package, image, alias=None, user_script="",
-                             inject_rerunable_userscript_functionality=False, ssh_keys=False):
+                             inject_rerunnable_userscript_functionality=False, ssh_keys=False):
 
         params = {'brand': 'joyent', 'owner_uuid': owner, 'networks': networks, 'billing_id': package,
                   'image_uuid': image}
@@ -139,7 +154,7 @@ class DataCenter(object):
             customer_metadata.update({'user-script': user_script})
 
 
-            if inject_rerunable_userscript_functionality:
+            if inject_rerunnable_userscript_functionality:
                 internal_metadata = {}
                 internal_metadata.update({'operator-script': mdata.script})
                 params.update({'internal_metadata': internal_metadata})
