@@ -55,7 +55,7 @@ class DataCenter(object):
                 TENANT_NIC_TAG = cfg_parser.get('NETWORK', 'TENANT_NIC_TAG')
         if cfg_parser.has_option('NETWORK', 'TENANT_VLAN'):
                 CONF_TENANT_VLAN = cfg_parser.get('NETWORK', 'TENANT_VLAN')
-                TENANT_VLAN_RANGE = xrange(CONF_TENANT_VLAN.split(':')[0], CONF_TENANT_VLAN.split(':')[1])
+                TENANT_VLAN_RANGE = xrange(int(CONF_TENANT_VLAN.split(':')[0]), int(CONF_TENANT_VLAN.split(':')[1]))
 
 
     def request(self, method, api, path, headers=None, data=None, **kwargs):

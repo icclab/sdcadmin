@@ -17,7 +17,7 @@ from setuptools import setup
 
 setup(
     name='sdcadmin',
-    version='0.2',
+    version='0.3',
     packages=['sdcadmin', 'sdcadmin.tests', 'sdcadmin.tests.config'],
     url='https://github.com/icclab/sdcadmin',
     license='Apache License, Version 2.0',
