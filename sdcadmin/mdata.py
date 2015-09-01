@@ -18,12 +18,13 @@ then
 else
     exit 1
 fi
-MDATA_DELETE=/usr/sbin/mdata-delete
-SLEEP=/opt/local/bin/sleep
-BASE64=/usr/bin/base64 # only used in linux
-CHMOD=/bin/chmod
-CAT=/bin/cat
-NOHUP=/bin/nohup
+PATH="${PATH}:/bin:/usr/sbin/:/opt/local/bin/"
+MDATA_DELETE=$( which mdata-delete )
+SLEEP=$( which sleep )
+BASE64=$( which base64 ) # only used in linux
+CHMOD=$( which chmod )
+CAT=$( which cat )
+NOHUP=$( which nohup )
 
 # vars
 RUN_TRIGGER=rerun-user-script
@@ -46,7 +47,7 @@ ${CAT} > /tmp/rerun-user-script <<_EOF
 while true
 do
     ${MDATA_GET} ${RUN_TRIGGER} >/dev/null 2>&1
-    if [ $? -eq 0 ]
+    if [ \$? -eq 0 ]
     then
         ${MDATA_GET} user-script > /tmp/user-script
         ${CHMOD} +x /tmp/user-script
